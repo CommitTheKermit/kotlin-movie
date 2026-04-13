@@ -2,6 +2,7 @@ package view
 
 import domain.cinema.MovieTime
 import kotlinx.datetime.LocalDate
+import view.message.InputMessage
 
 object InputView {
     fun readLine(): String {
@@ -11,61 +12,55 @@ object InputView {
     }
 
     fun startTicketing(): YesNo {
-        println("영화 예매를 시작합니다. 새 예매를 생성하시겠습니까? (Y/N)")
+        println(InputMessage.START_TICKETING)
         return YesNo.from(readLine())
     }
 
     fun continueTicketing(): YesNo {
-        println("다른 영화를 추가하시겠습니까? (Y/N)")
+        println(InputMessage.CONTINUE_TICKETING)
         return YesNo.from(readLine())
     }
 
     fun readMovieTitle(): String {
-        println("예매할 영화 제목을 입력하세요:")
+        println(InputMessage.INPUT_MOVIE_TITLE)
         val input = readLine()
         return input
     }
 
     fun readDate(): MovieTime {
-        println("날짜를 입력하세요 (YYYY-MM-DD):")
+        println(InputMessage.INPUT_DATE)
         val input = readLine()
         val date = runCatching { LocalDate.parse(input) }.getOrNull()
-            ?: throw IllegalArgumentException("올바른 날짜 형식이 아닙니다. (YYYY-MM-DD)")
+            ?: throw IllegalArgumentException(InputMessage.ERROR_INVALID_DATE_FORMAT)
         return MovieTime.from(date)
     }
 
     fun readShowingNumber(): String {
-        println("상영 번호를 선택하세요:")
+        println(InputMessage.INPUT_SHOWING_NUMBER)
         val input = readLine()
         return input
     }
 
     fun readSeat(): List<String> {
-        println("예약할 좌석을 입력하세요 (A1, B2):")
+        println(InputMessage.INPUT_SEAT)
         val input = readLine()
         val inputs = input.split(',').map { it.trim() }
         return inputs
     }
 
     fun readPurchaseConfirm(): YesNo {
-        println("위 금액으로 결제하시겠습니까? (Y/N)")
+        println(InputMessage.CONFIRM_PURCHASE)
         return YesNo.from(readLine())
     }
 
     fun readPoint(): String {
-        println("사용할 포인트를 입력하세요 (없으면 0):")
+        println(InputMessage.INPUT_POINT)
         val input = readLine()
         return input
     }
 
     fun readPaymentMethod(): String {
-        println(
-            """
-            결제 수단을 선택하세요:
-            1) 신용카드(5% 할인)
-            2) 현금(2% 할인)
-            """.trimIndent(),
-        )
+        println(InputMessage.SELECT_PAYMENT_METHOD)
         val input = readLine()
         return input
     }

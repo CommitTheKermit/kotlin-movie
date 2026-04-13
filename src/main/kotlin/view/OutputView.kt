@@ -9,10 +9,11 @@ import domain.reservation.ReservationInfo
 import domain.user.Point
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
+import view.message.OutputMessage
 
 object OutputView {
     fun printShowing(showings: Showings) {
-        println("해당 날짜의 상영 목록")
+        println(OutputMessage.SHOWING_LIST_HEADER)
 
         showings.showings.forEachIndexed { index, showing ->
             println("[${index + 1}] ${showing.startTime.time}")
@@ -21,7 +22,7 @@ object OutputView {
 
     fun printSeats(screen: Screen) {
 
-        println("좌석 배치도")
+        println(OutputMessage.SEAT_MAP_HEADER)
         val header = " ".repeat(3) + (1..Screen.MAX_COLUMN).joinToString("    ")
         println(header)
         printSeatRows(screen)
@@ -39,7 +40,7 @@ object OutputView {
     }
 
     fun printCart(items: List<ReservationInfo>) {
-        println("장바구니")
+        println(OutputMessage.CART_HEADER)
         items.forEach { println(formatReservationInfo(it)) }
         println()
     }
@@ -66,8 +67,8 @@ object OutputView {
     }
 
     fun printTotalPrice(price: Int) {
-        println("가격 계산")
-        println("최종 결제 금액: ${printByDecimalFormat(price)}원")
+        println(OutputMessage.PRICE_CALCULATION_HEADER)
+        println(OutputMessage.FINAL_PRICE_FORMAT.format(printByDecimalFormat(price)))
         println()
     }
 
@@ -76,7 +77,7 @@ object OutputView {
     }
 
     fun printError(message: String) {
-        println("[ERROR] $message")
+        println("${OutputMessage.ERROR_PREFIX}$message")
     }
 
     fun printTotal(
@@ -84,13 +85,13 @@ object OutputView {
         totalPrice: Price,
         usedPoint: Point,
     ) {
-        println("예매완료")
-        println("내역:")
+        println(OutputMessage.BOOKING_COMPLETE)
+        println(OutputMessage.DETAILS_HEADER)
         printCart(cart.showItems())
 
-        println("결제 금액: ${printByDecimalFormat(totalPrice.price)}원 (포인트 ${printByDecimalFormat(usedPoint.point)})")
+        println(OutputMessage.PAYMENT_SUMMARY_FORMAT.format(printByDecimalFormat(totalPrice.price), printByDecimalFormat(usedPoint.point)))
 
         println()
-        println("감사합니다.")
+        println(OutputMessage.THANK_YOU)
     }
 }

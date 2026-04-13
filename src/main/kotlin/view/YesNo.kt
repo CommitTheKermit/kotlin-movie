@@ -1,5 +1,7 @@
 package view
 
+import view.message.InputMessage
+
 enum class YesNo {
     Y,
     N,
@@ -9,6 +11,6 @@ enum class YesNo {
 
     companion object {
         fun from(input: String): YesNo = entries.firstOrNull { it.name == input }
-            ?: throw IllegalArgumentException("입력값은 Y 혹은 N이어야 합니다.")
+            ?: throw IllegalArgumentException(InputMessage.ERROR_INVALID_YES_NO)
     }
 }

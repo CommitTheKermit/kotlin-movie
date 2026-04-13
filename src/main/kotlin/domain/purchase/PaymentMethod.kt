@@ -1,5 +1,7 @@
 package domain.purchase
 
+import view.message.PurchaseMessages
+
 enum class PaymentMethod {
     CARD,
     CASH,
@@ -15,8 +17,9 @@ enum class PaymentMethod {
     companion object {
         const val CARD_DISCOUNT_PERCENT = 0.05
         const val CASH_DISCOUNT_PERCENT = 0.02
+
         fun from(index: Int): PaymentMethod {
-            require(index in 1..entries.size) { "유효하지 않은 결제 수단입니다." }
+            require(index in 1..entries.size) { PurchaseMessages.ERROR_INVALID_METHOD }
             return entries[index - 1]
         }
     }

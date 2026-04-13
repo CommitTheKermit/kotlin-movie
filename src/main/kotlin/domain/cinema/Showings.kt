@@ -1,6 +1,7 @@
 package domain.cinema
 
 import domain.reservation.ReservationInfos
+import view.message.CinemaMessages
 
 class Showings(val showings: List<Showing>) {
     operator fun get(index: Int): Showing = showings[index]
@@ -12,12 +13,12 @@ class Showings(val showings: List<Showing>) {
         movieTime: MovieTime,
     ): Showings {
         val filtered = showings.filter { it.movie == movie && it.startTime.isOnSameDate(movieTime) }
-        require(filtered.isNotEmpty()) { "해당 영화는 해당 날짜에 상영되지 않습니다." }
+        require(filtered.isNotEmpty()) { CinemaMessages.ERROR_NO_SHOWINGS_ON_DATE }
         return Showings(filtered)
     }
 
     fun findByIndex(input: String): Showing {
-        require(input.toIntOrNull() != null && input.toInt() <= showings.size) { "선택하신 상영 번호는 없는 상영 번호입니다." }
+        require(input.toIntOrNull() != null && input.toInt() <= showings.size) { CinemaMessages.ERROR_INVALID_SHOWING_NUMBER }
         return showings[input.toInt() - 1]
     }
 
