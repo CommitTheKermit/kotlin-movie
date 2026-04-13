@@ -2,7 +2,6 @@ package controller
 
 import domain.cart.Cart
 import domain.purchase.Payment
-import domain.reservation.ReservationInfos
 import domain.user.User
 import view.InputView
 import view.OutputView
@@ -14,8 +13,8 @@ class BookingController(
     private val paymentController: PaymentController,
     private val user: User,
 ) {
-    fun run() {
-        var cart = Cart(ReservationInfos(emptyList()))
+    fun run(inputCart: Cart) {
+        var cart = inputCart
         var answer = retryUntilValid { InputView.startTicketing() }
         while (answer.isYes()) {
             val info = reservationController.run()
