@@ -1,6 +1,7 @@
 package view
 
 import domain.cinema.MovieTime
+import kotlinx.datetime.LocalDate
 
 object InputView {
     fun readLine(): String {
@@ -27,7 +28,10 @@ object InputView {
 
     fun readDate(): MovieTime {
         println("날짜를 입력하세요 (YYYY-MM-DD):")
-        return MovieTime.from(readLine())
+        val input = readLine()
+        val date = runCatching { LocalDate.parse(input) }.getOrNull()
+            ?: throw IllegalArgumentException("올바른 날짜 형식이 아닙니다. (YYYY-MM-DD)")
+        return MovieTime.from(date)
     }
 
     fun readShowingNumber(): String {

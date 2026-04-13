@@ -34,10 +34,6 @@ data class MovieTime(val value: LocalDateTime) : Comparable<MovieTime> {
             minute: Int,
         ): MovieTime = MovieTime(LocalDateTime(year, month, day, hour, minute))
 
-        fun from(input: String): MovieTime {
-            val date = runCatching { LocalDate.parse(input) }.getOrNull()
-                ?: throw IllegalArgumentException("올바른 날짜 형식이 아닙니다. (YYYY-MM-DD)")
-            return MovieTime(LocalDateTime(date, LocalTime(0, 0)))
-        }
+        fun from(date: LocalDate): MovieTime = MovieTime(LocalDateTime(date, LocalTime(0, 0)))
     }
 }
