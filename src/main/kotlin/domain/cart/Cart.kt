@@ -3,10 +3,10 @@ package domain.cart
 import domain.reservation.ReservationInfo
 import domain.reservation.ReservationInfos
 
-class Cart(val reservationInfos: ReservationInfos) {
+data class Cart(val reservationInfos: ReservationInfos) {
     fun addInfo(info: ReservationInfo): Cart {
-        return Cart(
-            ReservationInfos(
+        return copy(
+            reservationInfos = ReservationInfos(
                 reservationInfos.infos + info,
             ),
         )
