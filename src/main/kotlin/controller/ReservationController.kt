@@ -13,8 +13,8 @@ class ReservationController(private val movieTheater: MovieTheater) {
     fun run(): ReservationInfo {
         val movie = retryUntilValid { chooseMovie() }
         val (movieTime, candidates) = retryUntilValid {
-            val t = InputView.readDate()
-            t to movieTheater.showings.findByMovieAndDate(movie, t)
+            val at = InputView.readDate()
+            at to movieTheater.showings.findByMovieAndDate(movie, at)
         }
         OutputView.printShowing(candidates)
         val showing = retryUntilValid {
