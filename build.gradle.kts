@@ -19,6 +19,7 @@ dependencies {
     testImplementation("org.assertj", "assertj-core", "3.27.7")
     testImplementation("io.kotest", "kotest-runner-junit5", "6.0.7")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+    runtimeOnly("com.h2database:h2:2.4.240")
 }
 
 tasks {
