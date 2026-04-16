@@ -10,9 +10,9 @@ import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.client.RestTestClient
 import repository.SchemaInitializer
-import repository.ShowingRepository
 import spring.model.response.MovieResponse
 import spring.model.response.ReservationResponse
+import spring.repository.ShowingRepository
 import view.message.CinemaMessages
 import view.message.SeatMessages
 

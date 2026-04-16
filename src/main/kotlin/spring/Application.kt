@@ -3,7 +3,7 @@ package spring
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
-@SpringBootApplication(scanBasePackages = ["spring", "repository"])
+@SpringBootApplication(scanBasePackages = ["spring"])
 class Application
 
 fun main(args: Array<String>) {

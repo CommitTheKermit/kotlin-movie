@@ -1,4 +1,4 @@
-package repository
+package spring.repository
 
 import domain.Id
 import domain.cinema.Movie

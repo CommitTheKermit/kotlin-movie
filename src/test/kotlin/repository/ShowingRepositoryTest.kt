@@ -7,6 +7,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.datasource.DriverManagerDataSource
+import repository.SchemaInitializer
+import spring.repository.ShowingRepository
 
 class ShowingRepositoryTest {
     private lateinit var dataSource: DataSource

@@ -1,4 +1,4 @@
-package repository
+package spring.repository
 
 import domain.seat.Seat
 import domain.seat.SeatCoordinate

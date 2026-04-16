@@ -3,7 +3,7 @@ package spring
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
-import repository.ShowingRepository
+import spring.repository.ShowingRepository
 
 @Component
 class MockDataInitializer(private val showingRepository: ShowingRepository) : ApplicationRunner {

@@ -8,6 +8,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.jdbc.datasource.DriverManagerDataSource
+import repository.SchemaInitializer
+import spring.repository.ReservationRepository
+import spring.repository.ShowingRepository
 import view.message.SeatMessages
 
 class ReservationRepositoryTest {

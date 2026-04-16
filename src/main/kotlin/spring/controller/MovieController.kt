@@ -2,9 +2,9 @@ package spring.controller
 
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
-import repository.MovieRepository
-import repository.ShowingRepository
 import spring.model.response.MovieResponse
+import spring.repository.MovieRepository
+import spring.repository.ShowingRepository
 
 @RestController
 class MovieController(private val movieRepository: MovieRepository, private val showingRepository: ShowingRepository) {

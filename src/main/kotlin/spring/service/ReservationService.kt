@@ -4,11 +4,11 @@ import domain.reservation.ReservationInfo
 import domain.seat.Seats
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import repository.ReservationRepository
-import repository.SeatRepository
-import repository.ShowingRepository
 import spring.model.request.ReservationRequest
 import spring.model.response.ReservationResponse
+import spring.repository.ReservationRepository
+import spring.repository.SeatRepository
+import spring.repository.ShowingRepository
 import view.message.CinemaMessages
 
 @Service

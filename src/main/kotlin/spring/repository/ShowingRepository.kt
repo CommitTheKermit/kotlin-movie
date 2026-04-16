@@ -1,4 +1,4 @@
-package repository
+package spring.repository
 
 import domain.Id
 import domain.cinema.Movie
@@ -9,6 +9,7 @@ import domain.cinema.Showings
 import domain.seat.Seats
 import java.sql.ResultSet
 import java.sql.Statement
+import java.time.LocalDateTime
 import javax.sql.DataSource
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toKotlinLocalDateTime
@@ -88,7 +89,7 @@ class ShowingRepository(val dataSource: DataSource) {
 
     private fun ResultSet.toShowing(): Showing {
         val startTime = MovieTime(
-            getObject("start_time", java.time.LocalDateTime::class.java)
+            getObject("start_time", LocalDateTime::class.java)
                 .toKotlinLocalDateTime(),
         )
         val movie = Movie(
