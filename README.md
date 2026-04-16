@@ -15,7 +15,7 @@
 ## 단위 테스트 목록 
 ### Repository
 - [x] 저장한 상영 정보를 조회하면 영화, 시작 시각이 복원된다
-- [ ] 특정 영화의 모든 상영 정보를 조회할 수 있다
+- [x] 특정 영화의 모든 상영 정보를 조회할 수 있다
 - [ ] 저장한 예매를 조회하면 상영, 좌석, 금액이 복원된다
 - [ ] 같은 좌석을 같은 상영에 중복 예매하면 실패한다
 
@@ -35,8 +35,8 @@
   - [ ] 좌석 테이블 설계
 
 Reservation     -> Id, ShowingId, SeatId
-reservation_seat-> id, seatid, screenid
+reservation_seat-> id, seatid
 Movie           -> id, title, runningTime
-Showing         -> id, startTime, endTime, screenId, movieId
+Showing         -> id, startTime, endTime, movieId
 Screen          -> id, cinemaId
 Seat            -> id, row, column, grade

@@ -5,6 +5,7 @@ import domain.cinema.Movie
 import domain.cinema.MovieTime
 import domain.cinema.Screen
 import domain.cinema.Showing
+import domain.cinema.Showings
 import domain.seat.Seats
 import java.sql.Connection
 import java.sql.DriverManager
@@ -66,6 +67,44 @@ class ShowingRepository(val connection: Connection) {
             }
         }
     }
+
+    fun findByMovieId(movieId: Id): Showings {
+        val sql = """
+            SELECT s.start_time,
+                   s.screen_id,
+                   m.id AS movie_id,
+                   m.title,
+                   m.running_minutes
+            FROM showing s
+            JOIN movie m ON s.movie_id = m.id
+            WHERE m.id = ?
+        """.trimIndent()
+
+        return connection.prepareStatement(sql).use { ps ->
+            ps.setLong(1, movieId.value.toLong())
+            ps.executeQuery().use { rs ->
+                val showings = mutableListOf<Showing>()
+                while (rs.next()) {
+                    val startTime = MovieTime(
+                        rs.getObject("start_time", java.time.LocalDateTime::class.java)
+                            .toKotlinLocalDateTime(),
+                    )
+                    val movie = Movie(
+                        title = rs.getString("title"),
+                        id = Id(rs.getInt("movie_id")),
+                        runningTime = rs.getInt("running_minutes"),
+                    )
+                    val screen = Screen(
+                        seats = Seats(emptyList()),
+                        id = Id(rs.getInt("screen_id")),
+                    )
+                    showings.add(Showing(startTime, screen, movie))
+                }
+
+                Showings(showings)
+            }
+        }
+    }
 }
 
 object SchemaInitializer {
@@ -105,8 +144,31 @@ class ShowingRepositoryTest {
         // when : 상영 정보를 조회하면
         val found = repository.findById(savedId)
 
-        // then : 주어졌단 상영정보의 영화와 시작 시간이 반환된다.
+        // then : 주어졌던 상영정보의 영화와 시작 시간이 반환된다.
         assertThat(found?.movie?.title).isEqualTo(TestFixtureData.movies.movies.first().title)
         assertThat(found?.startTime).isEqualTo(movieTime)
+    }
+
+    @Test
+    fun `특정 영화의 모든 상영 정보를 조회할 수 있다`() {
+        // given : 상영 정보들이 주어지고 상영 정보들을 저장한다.
+        val showings = TestFixtureData.showings
+        showings.showings.forEach {
+            repository.save(it)
+        }
+
+        // when : 특정 영화의 모든 상영 정보를 조회하면
+        val foundShowings = repository.findByMovieId(
+            TestFixtureData.movies.movies.first().id,
+        )
+
+        // then : 주어진 상영 정보들이 복원된다
+        assertThat(foundShowings.showings)
+            .hasSize(3)
+            .allSatisfy {
+                assertThat(it.movie.title).isEqualTo(
+                    TestFixtureData.movies.movies.first().title,
+                )
+            }
     }
 }

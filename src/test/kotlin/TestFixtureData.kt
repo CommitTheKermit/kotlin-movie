@@ -52,6 +52,10 @@ object TestFixtureData {
             Showing(MovieTime(2026, 4, 10, 10, 0), screens[0], movies.movies[0]),
             Showing(MovieTime(2026, 4, 10, 14, 0), screens[1], movies.movies[1]),
             Showing(MovieTime(2026, 4, 10, 21, 0), screens[2], movies.movies[2]),
+            Showing(MovieTime(2026, 4, 10, 13, 0), screens[1], movies.movies[0]),
+            Showing(MovieTime(2026, 4, 10, 18, 30), screens[2], movies.movies[0]),
+            Showing(MovieTime(2026, 4, 11, 10, 0), screens[0], movies.movies[1]),
+            Showing(MovieTime(2026, 4, 11, 15, 0), screens[1], movies.movies[2]),
         ),
     )
 
