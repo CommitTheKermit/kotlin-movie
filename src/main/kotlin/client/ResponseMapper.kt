@@ -16,3 +16,9 @@ fun ShowingResponse.toShowing(movie: MovieResponse): Showing = Showing(
     movie = Movie(title = movie.title, id = Id(movie.id), runningTime = movie.runningTimeMinutes),
     screen = Screen(seats = Seats(emptyList()), id = Id(screenId)),
 )
+
+fun MovieResponse.toMovie(): Movie = Movie(
+    title = title,
+    id = Id(id),
+    runningTime = runningTimeMinutes,
+)
