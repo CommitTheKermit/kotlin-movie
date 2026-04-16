@@ -2,7 +2,7 @@ package domain.seat
 
 import view.message.SeatMessages
 
-class SeatCoordinate(val row: Char, val column: Int) {
+data class SeatCoordinate(val row: Char, val column: Int) {
     init {
         require(row.isUpperCase()) { SeatMessages.ERROR_INVALID_ROW }
         require(column > 0) { SeatMessages.ERROR_INVALID_COLUMN }

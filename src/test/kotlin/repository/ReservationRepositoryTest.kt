@@ -11,6 +11,8 @@ import domain.seat.SeatCoordinate
 import domain.seat.SeatGrade
 import domain.seat.SeatState
 import domain.seat.Seats
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.Statement
@@ -20,20 +22,58 @@ import kotlinx.datetime.toKotlinLocalDateTime
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import view.message.SeatMessages
 
 class ReservationRepository(val connection: Connection) {
     fun save(
         reservationInfo: ReservationInfo,
         showingId: Long,
     ): List<Long> {
+        val reserved = findReservedSeatNumbers(showingId)
+        val requested = reservationInfo.seats.seats.map {
+            it.coordinate
+        }
+        require(
+            reserved.intersect(requested.toSet())
+                .isEmpty(),
+        ) { SeatMessages.ERROR_SEAT_ALREADY_RESERVED }
+
         val savedIds = reservationInfo.seats.seats.map {
-            val seatId = getSeatId(it)
             val reservationId = insertReservation(showingId)
+            val seatId = getSeatId(it)
 
             insertReservationSeat(reservationId, seatId)
         }
 
         return savedIds
+    }
+
+    fun findReservedSeatNumbers(showingId: Long): List<SeatCoordinate> {
+        val sql = """
+            SELECT se.seat_number
+            FROM reservation r
+            JOIN showing s ON r.showing_id = s.id
+            JOIN reservation_seat rs ON r.id = rs.reservation_id
+            JOIN seat se ON rs.seat_id = se.id
+            WHERE s.id = ?
+        """.trimIndent()
+
+        return connection.prepareStatement(sql).use { ps ->
+            ps.setLong(1, showingId)
+            ps.executeQuery().use { rs ->
+                val seatNumbers = mutableListOf<SeatCoordinate>()
+                while (rs.next()) {
+                    val seatNumber = rs.getString("seat_number")
+                    seatNumbers.add(
+                        SeatCoordinate(
+                            seatNumber[0],
+                            seatNumber.substring(1).toInt(),
+                        ),
+                    )
+                }
+                seatNumbers
+            }
+        }
     }
 
     fun getSeatId(seat: Seat): Long {
@@ -183,5 +223,20 @@ class ReservationRepositoryTest {
             .containsExactlyInAnyOrderElementsOf(
                 reservationInfo.seats.seats.map { "${it.coordinate.row}${it.coordinate.column}" },
             )
+    }
+
+    @Test
+    fun `같은 좌석을 같은 상영에 중복 예매하면 실패한다`() {
+        // given : 상영 정보, 예매가 주어지고 상영 정보들의 id를 가져와 예매를 저장한다
+        val reservationInfo = TestFixtureData.reservationInfos.infos.first()
+        val showing = reservationInfo.showing
+        val savedShowingId = showingRepository.save(showing)
+        repository.save(reservationInfo, savedShowingId)
+
+        // when & then : 같은 좌석을 다시 예매하면 예외가 발생한다
+        val exception = shouldThrow<IllegalArgumentException> {
+            repository.save(reservationInfo, savedShowingId)
+        }
+        exception.message shouldBe SeatMessages.ERROR_SEAT_ALREADY_RESERVED
     }
 }
