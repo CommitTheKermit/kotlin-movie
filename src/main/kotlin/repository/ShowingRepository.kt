@@ -8,6 +8,7 @@ import domain.cinema.Showing
 import domain.cinema.Showings
 import domain.seat.Seats
 import java.sql.Connection
+import java.sql.ResultSet
 import java.sql.Statement
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toKotlinLocalDateTime
@@ -32,7 +33,8 @@ class ShowingRepository(val connection: Connection) {
 
     fun findById(id: Long): Showing? {
         val sql = """
-            SELECT s.start_time,
+            SELECT s.id AS showing_id,
+                   s.start_time,
                    s.screen_id,
                    m.id AS movie_id,
                    m.title,
@@ -46,27 +48,15 @@ class ShowingRepository(val connection: Connection) {
             ps.setLong(1, id)
             ps.executeQuery().use { rs ->
                 if (!rs.next()) return@use null
-                val startTime = MovieTime(
-                    rs.getObject("start_time", java.time.LocalDateTime::class.java)
-                        .toKotlinLocalDateTime(),
-                )
-                val movie = Movie(
-                    title = rs.getString("title"),
-                    id = Id(rs.getInt("movie_id")),
-                    runningTime = rs.getInt("running_minutes"),
-                )
-                val screen = Screen(
-                    seats = Seats(emptyList()),
-                    id = Id(rs.getInt("screen_id")),
-                )
-                Showing(startTime, screen, movie)
+                rs.toShowing()
             }
         }
     }
 
     fun findByMovieId(movieId: Id): Showings {
         val sql = """
-            SELECT s.start_time,
+            SELECT s.id AS showing_id,
+                   s.start_time,
                    s.screen_id,
                    m.id AS movie_id,
                    m.title,
@@ -81,24 +71,28 @@ class ShowingRepository(val connection: Connection) {
             ps.executeQuery().use { rs ->
                 val showings = mutableListOf<Showing>()
                 while (rs.next()) {
-                    val startTime = MovieTime(
-                        rs.getObject("start_time", java.time.LocalDateTime::class.java)
-                            .toKotlinLocalDateTime(),
-                    )
-                    val movie = Movie(
-                        title = rs.getString("title"),
-                        id = Id(rs.getInt("movie_id")),
-                        runningTime = rs.getInt("running_minutes"),
-                    )
-                    val screen = Screen(
-                        seats = Seats(emptyList()),
-                        id = Id(rs.getInt("screen_id")),
-                    )
-                    showings.add(Showing(startTime, screen, movie))
+                    showings.add(rs.toShowing())
                 }
 
                 Showings(showings)
             }
         }
+    }
+
+    private fun ResultSet.toShowing(): Showing {
+        val startTime = MovieTime(
+            getObject("start_time", java.time.LocalDateTime::class.java)
+                .toKotlinLocalDateTime(),
+        )
+        val movie = Movie(
+            title = getString("title"),
+            id = Id(getInt("movie_id")),
+            runningTime = getInt("running_minutes"),
+        )
+        val screen = Screen(
+            seats = Seats(emptyList()),
+            id = Id(getInt("screen_id")),
+        )
+        return Showing(startTime, screen, movie, Id(getInt("showing_id")))
     }
 }
