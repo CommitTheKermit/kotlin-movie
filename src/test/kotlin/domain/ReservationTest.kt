@@ -1,7 +1,6 @@
 package domain
 
 import domain.cinema.MovieTime
-import domain.cinema.Showing
 import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -44,7 +43,7 @@ class ReservationTest {
         val result = TestFixtureData.movieTheater.showings.findByMovieAndDate(movie, movieTime)
 
         // then : 해당하는 상영 일정을 반환한다.
-        assertEquals(listOf<Showing>(TestFixtureData.showings.first()), result.showings)
+        assertEquals(listOf(TestFixtureData.showings.first(), TestFixtureData.showings[3], TestFixtureData.showings[4]), result.showings)
     }
 
     @Test
@@ -91,7 +90,7 @@ class ReservationTest {
             TestFixtureData.movieTheater.showings.findAvailableShowing(
                 movie,
                 movieTime,
-                "2",
+                "10",
                 TestFixtureData.movieTheater.reservationInfos,
             )
         }
