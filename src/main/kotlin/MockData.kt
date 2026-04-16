@@ -16,9 +16,9 @@ import domain.seat.Seats
 object MockData {
     val movies = Movies(
         listOf(
-            Movie("F1 더 무비", Id(1), 130),
-            Movie("토이 스토리", Id(2), 100),
-            Movie("아이언맨", Id(3), 126),
+            Movie("해리 포터", Id(1), 152),
+            Movie("인터스텔라", Id(2), 169),
+            Movie("기생충", Id(3), 132),
         ),
     )
 

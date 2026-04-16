@@ -87,6 +87,31 @@ class ShowingRepository(val dataSource: DataSource) {
         }
     }
 
+    fun findAll(): List<Showing> {
+        val sql = """
+            SELECT s.id AS showing_id,
+                   s.start_time,
+                   s.screen_id,
+                   m.id AS movie_id,
+                   m.title,
+                   m.running_minutes
+            FROM showing s
+            JOIN movie m ON s.movie_id = m.id
+        """.trimIndent()
+
+        return dataSource.connection.use { connection ->
+            connection.prepareStatement(sql).use { ps ->
+                ps.executeQuery().use { rs ->
+                    val showings = mutableListOf<Showing>()
+                    while (rs.next()) {
+                        showings.add(rs.toShowing())
+                    }
+                    showings
+                }
+            }
+        }
+    }
+
     private fun ResultSet.toShowing(): Showing {
         val startTime = MovieTime(
             getObject("start_time", LocalDateTime::class.java)
