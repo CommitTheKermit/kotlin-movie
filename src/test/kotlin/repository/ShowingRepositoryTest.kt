@@ -2,25 +2,23 @@ package repository
 
 import domain.cinema.MovieTime
 import domain.cinema.Showing
-import java.sql.Connection
-import java.sql.DriverManager
+import javax.sql.DataSource
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.jdbc.datasource.DriverManagerDataSource
 
 class ShowingRepositoryTest {
-    private lateinit var connection: Connection
+    private lateinit var dataSource: DataSource
     private lateinit var repository: ShowingRepository
 
     @BeforeEach
     fun setUp() {
-        connection = DriverManager.getConnection(
+        dataSource = DriverManagerDataSource(
             "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "sa", "",
         )
-        repository = ShowingRepository(
-            connection = connection,
-        )
-        SchemaInitializer.initialize(connection)
+        dataSource.connection.use { SchemaInitializer.initialize(it) }
+        repository = ShowingRepository(dataSource)
     }
 
     @Test

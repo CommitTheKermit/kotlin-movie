@@ -7,26 +7,30 @@ import domain.cinema.Screen
 import domain.cinema.Showing
 import domain.cinema.Showings
 import domain.seat.Seats
-import java.sql.Connection
 import java.sql.ResultSet
 import java.sql.Statement
+import javax.sql.DataSource
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toKotlinLocalDateTime
+import org.springframework.stereotype.Repository
 
-class ShowingRepository(val connection: Connection) {
+@Repository
+class ShowingRepository(val dataSource: DataSource) {
     fun save(showing: Showing): Long {
         val sql = "INSERT INTO showing (start_time, end_time, screen_id, movie_id)" +
             " VALUES (?, ?, ?, ?)"
 
-        return connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).use { ps ->
-            ps.setObject(1, showing.startTime.value.toJavaLocalDateTime())
-            ps.setObject(2, showing.endTime.value.toJavaLocalDateTime())
-            ps.setInt(3, showing.screen.id.value)
-            ps.setInt(4, showing.movie.id.value)
-            ps.executeUpdate()
+        return dataSource.connection.use { connection ->
+            connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).use { ps ->
+                ps.setObject(1, showing.startTime.value.toJavaLocalDateTime())
+                ps.setObject(2, showing.endTime.value.toJavaLocalDateTime())
+                ps.setInt(3, showing.screen.id.value)
+                ps.setInt(4, showing.movie.id.value)
+                ps.executeUpdate()
 
-            ps.generatedKeys.use { keys ->
-                if (keys.next()) keys.getLong(1) else error("No generated id")
+                ps.generatedKeys.use { keys ->
+                    if (keys.next()) keys.getLong(1) else error("No generated id")
+                }
             }
         }
     }
@@ -43,12 +47,13 @@ class ShowingRepository(val connection: Connection) {
             JOIN movie m ON s.movie_id = m.id
             WHERE s.id = ?
         """.trimIndent()
-
-        return connection.prepareStatement(sql).use { ps ->
-            ps.setLong(1, id)
-            ps.executeQuery().use { rs ->
-                if (!rs.next()) return@use null
-                rs.toShowing()
+        return dataSource.connection.use { connection ->
+            connection.prepareStatement(sql).use { ps ->
+                ps.setLong(1, id)
+                ps.executeQuery().use { rs ->
+                    if (!rs.next()) return@use null
+                    rs.toShowing()
+                }
             }
         }
     }
@@ -66,15 +71,17 @@ class ShowingRepository(val connection: Connection) {
             WHERE m.id = ?
         """.trimIndent()
 
-        return connection.prepareStatement(sql).use { ps ->
-            ps.setLong(1, movieId.value.toLong())
-            ps.executeQuery().use { rs ->
-                val showings = mutableListOf<Showing>()
-                while (rs.next()) {
-                    showings.add(rs.toShowing())
-                }
+        return dataSource.connection.use { connection ->
+            connection.prepareStatement(sql).use { ps ->
+                ps.setLong(1, movieId.value.toLong())
+                ps.executeQuery().use { rs ->
+                    val showings = mutableListOf<Showing>()
+                    while (rs.next()) {
+                        showings.add(rs.toShowing())
+                    }
 
-                Showings(showings)
+                    Showings(showings)
+                }
             }
         }
     }

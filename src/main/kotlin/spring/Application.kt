@@ -1,6 +1,5 @@
 package spring
 
-import domain.cinema.Movies
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,16 +17,7 @@ class GreetingController {
     }
 }
 
-@RestController
-class Movie {
-    @GetMapping("/api/movies")
-    fun getMovies(): Movies {
-
-        return MockData.movies
-    }
-}
-
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = ["spring", "repository"])
 class Application
 
 fun main(args: Array<String>) {

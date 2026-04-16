@@ -11,13 +11,16 @@ import domain.seat.SeatCoordinate
 import domain.seat.SeatGrade
 import domain.seat.SeatState
 import domain.seat.Seats
-import java.sql.Connection
 import java.sql.Statement
 import java.time.LocalDateTime
+import javax.sql.DataSource
 import kotlin.use
 import kotlinx.datetime.toKotlinLocalDateTime
+import org.springframework.stereotype.Repository
 import view.message.SeatMessages
-class ReservationRepository(val connection: Connection) {
+
+@Repository
+class ReservationRepository(val dataSource: DataSource) {
     fun save(
         reservationInfo: ReservationInfo,
         showingId: Long,
@@ -50,21 +53,22 @@ class ReservationRepository(val connection: Connection) {
             JOIN seat se ON rs.seat_id = se.id
             WHERE s.id = ?
         """.trimIndent()
-
-        return connection.prepareStatement(sql).use { ps ->
-            ps.setLong(1, showingId)
-            ps.executeQuery().use { rs ->
-                val seatNumbers = mutableListOf<SeatCoordinate>()
-                while (rs.next()) {
-                    val seatNumber = rs.getString("seat_number")
-                    seatNumbers.add(
-                        SeatCoordinate(
-                            seatNumber[0],
-                            seatNumber.substring(1).toInt(),
-                        ),
-                    )
+        return dataSource.connection.use { connection ->
+            connection.prepareStatement(sql).use { ps ->
+                ps.setLong(1, showingId)
+                ps.executeQuery().use { rs ->
+                    val seatNumbers = mutableListOf<SeatCoordinate>()
+                    while (rs.next()) {
+                        val seatNumber = rs.getString("seat_number")
+                        seatNumbers.add(
+                            SeatCoordinate(
+                                seatNumber[0],
+                                seatNumber.substring(1).toInt(),
+                            ),
+                        )
+                    }
+                    seatNumbers
                 }
-                seatNumbers
             }
         }
     }
@@ -77,11 +81,13 @@ class ReservationRepository(val connection: Connection) {
         """.trimMargin()
         val seatNumber: String = "${seat.coordinate.row}${seat.coordinate.column}"
 
-        return connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).use { ps ->
-            ps.setString(1, seatNumber)
-            ps.executeQuery().use { rs ->
-                if (rs.next()) rs.getLong("id")
-                else error("Seat not found: $seatNumber")
+        return dataSource.connection.use { connection ->
+            connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).use { ps ->
+                ps.setString(1, seatNumber)
+                ps.executeQuery().use { rs ->
+                    if (rs.next()) rs.getLong("id")
+                    else error("Seat not found: $seatNumber")
+                }
             }
         }
     }
@@ -92,12 +98,14 @@ class ReservationRepository(val connection: Connection) {
             VALUES (?)
         """.trimMargin()
 
-        return connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).use { ps ->
-            ps.setLong(1, showingId)
-            ps.executeUpdate()
+        return dataSource.connection.use { connection ->
+            connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).use { ps ->
+                ps.setLong(1, showingId)
+                ps.executeUpdate()
 
-            ps.generatedKeys.use { keys ->
-                if (keys.next()) keys.getLong(1) else error("No generated id")
+                ps.generatedKeys.use { keys ->
+                    if (keys.next()) keys.getLong(1) else error("No generated id")
+                }
             }
         }
     }
@@ -111,13 +119,15 @@ class ReservationRepository(val connection: Connection) {
             VALUES (?, ?)
         """.trimMargin()
 
-        return connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).use { ps ->
-            ps.setLong(1, reservationId)
-            ps.setLong(2, seatId)
-            ps.executeUpdate()
+        return dataSource.connection.use { connection ->
+            connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).use { ps ->
+                ps.setLong(1, reservationId)
+                ps.setLong(2, seatId)
+                ps.executeUpdate()
 
-            ps.generatedKeys.use { keys ->
-                if (keys.next()) keys.getLong(1) else error("No generated id")
+                ps.generatedKeys.use { keys ->
+                    if (keys.next()) keys.getLong(1) else error("No generated id")
+                }
             }
         }
     }
@@ -141,37 +151,39 @@ class ReservationRepository(val connection: Connection) {
           WHERE r.id = ?                                                                                                                                                             
             """.trimIndent()
 
-        return connection.prepareStatement(sql).use { ps ->
-            ps.setLong(1, reservationSeatId)
-            ps.executeQuery().use { rs ->
-                var showing: Showing? = null
-                val seats = mutableListOf<Seat>()
-                while (rs.next()) {
-                    if (showing == null) {
-                        showing = Showing(
-                            startTime = MovieTime(
-                                rs.getObject("start_time", LocalDateTime::class.java)
-                                    .toKotlinLocalDateTime(),
+        return dataSource.connection.use { connection ->
+            connection.prepareStatement(sql).use { ps ->
+                ps.setLong(1, reservationSeatId)
+                ps.executeQuery().use { rs ->
+                    var showing: Showing? = null
+                    val seats = mutableListOf<Seat>()
+                    while (rs.next()) {
+                        if (showing == null) {
+                            showing = Showing(
+                                startTime = MovieTime(
+                                    rs.getObject("start_time", LocalDateTime::class.java)
+                                        .toKotlinLocalDateTime(),
+                                ),
+                                screen = Screen(Seats(emptyList()), Id(rs.getInt("screen_id"))),
+                                movie = Movie(
+                                    title = rs.getString("title"),
+                                    id = Id(rs.getInt("movie_id")),
+                                    runningTime = rs.getInt("running_minutes"),
+                                ),
+                                id = Id(rs.getInt("showing_id")),
+                            )
+                        }
+                        val seatNumber = rs.getString("seat_number")
+                        seats.add(
+                            Seat(
+                                coordinate = SeatCoordinate(seatNumber[0], seatNumber.substring(1).toInt()),
+                                grade = SeatGrade.valueOf(rs.getString("grade")),
+                                isReserved = SeatState.RESERVED,
                             ),
-                            screen = Screen(Seats(emptyList()), Id(rs.getInt("screen_id"))),
-                            movie = Movie(
-                                title = rs.getString("title"),
-                                id = Id(rs.getInt("movie_id")),
-                                runningTime = rs.getInt("running_minutes"),
-                            ),
-                            id = Id(rs.getInt("showing_id")),
                         )
                     }
-                    val seatNumber = rs.getString("seat_number")
-                    seats.add(
-                        Seat(
-                            coordinate = SeatCoordinate(seatNumber[0], seatNumber.substring(1).toInt()),
-                            grade = SeatGrade.valueOf(rs.getString("grade")),
-                            isReserved = SeatState.RESERVED,
-                        ),
-                    )
+                    showing?.let { ReservationInfo(it, Seats(seats)) }
                 }
-                showing?.let { ReservationInfo(it, Seats(seats)) }
             }
         }
     }

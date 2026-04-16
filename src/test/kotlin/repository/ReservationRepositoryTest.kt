@@ -2,28 +2,29 @@ package repository
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import java.sql.Connection
-import java.sql.DriverManager
+import javax.sql.DataSource
+import kotlin.use
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.jdbc.datasource.DriverManagerDataSource
 import view.message.SeatMessages
 
 class ReservationRepositoryTest {
-    private lateinit var connection: Connection
+    private lateinit var dataSource: DataSource
     private lateinit var repository: ReservationRepository
 
     private lateinit var showingRepository: ShowingRepository
 
     @BeforeEach
     fun setUp() {
-        connection = DriverManager.getConnection(
+
+        dataSource = DriverManagerDataSource(
             "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "sa", "",
         )
-        repository = ReservationRepository(connection)
-
-        showingRepository = ShowingRepository(connection)
-        SchemaInitializer.initialize(connection)
+        dataSource.connection.use { SchemaInitializer.initialize(it) }
+        repository = ReservationRepository(dataSource)
+        showingRepository = ShowingRepository(dataSource)
     }
 
     @Test

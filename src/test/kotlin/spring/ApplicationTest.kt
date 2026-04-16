@@ -1,45 +1,55 @@
 package spring
 
+import javax.sql.DataSource
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.web.servlet.client.RestTestClient
+import repository.SchemaInitializer
+import repository.ShowingRepository
+import spring.model.MovieResponse
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ApplicationTest(@param:LocalServerPort val port: Int) {
+class ApplicationTest(
+    @param:LocalServerPort
+    val port: Int,
+    @Autowired
+    val dataSource: DataSource,
+    @Autowired
+    val repository: ShowingRepository,
+) {
     private lateinit var client: RestTestClient
 
     @BeforeEach
     fun setUp() {
-        client = RestTestClient
-            .bindToServer()
-            .baseUrl("http://localhost:$port")
-            .build()
+        client = RestTestClient.bindToServer().baseUrl("http://localhost:$port").build()
+        dataSource.connection.use { SchemaInitializer.initialize(it) }
     }
 
     @Test
-    fun test() {
-        println(port)
-    }
+    fun `전체 영화 목록 요청 시 영화 목록과 상영 정보가 응답된다`() {
+        // giving : 상영 정보 목록을 저장하고
+        val showings = TestFixtureData.showings
+        showings.showings.forEach {
+            repository.save(it)
+        }
 
-    @Test
-    fun test1() {
-        client.get().uri("/greeting").exchange()
-            .expectBody()
-            .jsonPath("$.name").isEqualTo("AO")
-    }
-    @Test
-    fun test2() {
-        client.get().uri("/greeting?name=test").exchange()
-            .expectBody()
-            .jsonPath("$.name").isEqualTo("test")
-    }
+        // when : 전체 영화 목록을 요청하면
+        val movies: List<MovieResponse> = client.get().uri("/api/movies").exchange()
+            .expectStatus().isOk
+            .expectBody(Array<MovieResponse>::class.java)
+            .returnResult().responseBody!!
+            .toList()
 
-    @Test
-    fun test3() {
-        client.get().uri("/greeting?name=test").exchange()
-            .expectBody()
-            .jsonPath("$.name").isEqualTo("test")
+        // then : 영화 목록과 상영 정보가 응답된다.
+        val expectedTitles = TestFixtureData.showings.showings
+            .map { it.movie.title }
+            .distinct()
+
+        assertThat(movies).extracting<String> { it.title }
+            .containsExactlyInAnyOrderElementsOf(expectedTitles)
     }
 }
