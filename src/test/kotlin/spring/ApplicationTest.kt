@@ -13,6 +13,7 @@ import repository.SchemaInitializer
 import repository.ShowingRepository
 import spring.model.response.MovieResponse
 import spring.model.response.ReservationResponse
+import view.message.SeatMessages
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ApplicationTest(
@@ -87,5 +88,42 @@ class ApplicationTest(
         // then : 좌석 개수만큼 예매가 생성되고 총 금액이 양수로 응답된다
         assertThat(response.reservationIds).hasSize(2)
         assertThat(response.totalPrice).isPositive()
+    }
+
+    @Test
+    fun `이미 예약된 좌석을 예매하면 오류가 응답된다`() {
+        // given : 상영을 저장하고 동일한 예약 요청을 먼저 한 번 등록한다
+        val showing = TestFixtureData.showings.showings[1]
+        showingRepository.save(showing)
+
+        val requestBody = """
+            {
+              "reservations": [
+                {
+                  "showingId": 1,
+                  "seats": ["C2", "C3"]
+                }
+              ],
+              "usedPoints": 2000,
+              "paymentMethod": "CARD"
+            }
+        """.trimIndent()
+
+        client.post()
+            .uri("/api/reservations")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBody)
+            .exchange()
+            .expectStatus().isOk
+
+        // when & then : 같은 상영, 같은 좌석에 대해 다시 요청하면 400 응답과 오류 메시지가 반환된다
+        client.post()
+            .uri("/api/reservations")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBody)
+            .exchange()
+            .expectStatus().isBadRequest
+            .expectBody(String::class.java)
+            .isEqualTo(SeatMessages.ERROR_SEAT_ALREADY_RESERVED)
     }
 }
