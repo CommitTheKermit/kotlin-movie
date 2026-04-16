@@ -12,7 +12,7 @@ class Showings(val showings: List<Showing>) {
         movie: Movie,
         movieTime: MovieTime,
     ): Showings {
-        val filtered = showings.filter { it.movie == movie && it.startTime.isOnSameDate(movieTime) }
+        val filtered = showings.filter { it.movie.id == movie.id && it.startTime.isOnSameDate(movieTime) }
         require(filtered.isNotEmpty()) { CinemaMessages.ERROR_NO_SHOWINGS_ON_DATE }
         return Showings(filtered)
     }
