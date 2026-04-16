@@ -6,16 +6,17 @@ import domain.seat.SeatGrade
 import domain.seat.SeatState
 import javax.sql.DataSource
 import org.springframework.stereotype.Repository
+import view.message.SeatMessages
 
 @Repository
 class SeatRepository(val dataSource: DataSource) {
-    fun findById(id: Long): Seat {
-        val sql = "SELECT seat_number, grade FROM seat WHERE id = ?"
+    fun findBySeatNumber(coordinate: String): Seat {
+        val sql = "SELECT seat_number, grade FROM seat WHERE seat_number = ?"
         return dataSource.connection.use { connection ->
             connection.prepareStatement(sql).use { ps ->
-                ps.setLong(1, id)
+                ps.setString(1, coordinate)
                 ps.executeQuery().use { rs ->
-                    if (!rs.next()) error("Seat not found: id=$id")
+                    if (!rs.next()) error(SeatMessages.ERROR_SEAT_NOT_FOUND)
                     val seatNumber = rs.getString("seat_number")
                     Seat(
                         coordinate = SeatCoordinate(seatNumber[0], seatNumber.substring(1).toInt()),

@@ -21,9 +21,9 @@ class SeatRepositoryTest {
     }
 
     @Test
-    fun `id로 좌석을 조회하면 좌표와 등급이 복원된다`() {
-        // given & when : DB에 id가 1인 좌석이 존재하고, id로 조회하면
-        val found = repository.findById(1L)
+    fun `좌표로 좌석을 조회하면 좌표와 등급이 복원된다`() {
+        // given & when : DB에 좌석이 존재하고, id로 조회하면
+        val found = repository.findBySeatNumber("A1")
 
         // then : 좌표 A1과 B 등급을 가진 좌석이 반환된다
         assertThat(found.coordinate.row).isEqualTo('A')

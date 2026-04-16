@@ -1,4 +1,4 @@
-package spring.model
+package spring.model.response
 
 import domain.cinema.Movie
 import domain.cinema.Showing
