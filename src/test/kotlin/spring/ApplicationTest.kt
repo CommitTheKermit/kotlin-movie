@@ -13,6 +13,7 @@ import repository.SchemaInitializer
 import repository.ShowingRepository
 import spring.model.response.MovieResponse
 import spring.model.response.ReservationResponse
+import view.message.CinemaMessages
 import view.message.SeatMessages
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -125,5 +126,32 @@ class ApplicationTest(
             .expectStatus().isBadRequest
             .expectBody(String::class.java)
             .isEqualTo(SeatMessages.ERROR_SEAT_ALREADY_RESERVED)
+    }
+
+    @Test
+    fun `존재하지 않는 상영에 예매하면 오류가 응답된다`() {
+        // given : 존재하지 않는 상영 ID가 제공된다.
+        val requestBody = """
+            {
+              "reservations": [
+                {
+                  "showingId": 12345,
+                  "seats": ["C2", "C3"]
+                }
+              ],
+              "usedPoints": 2000,
+              "paymentMethod": "CARD"
+            }
+        """.trimIndent()
+
+        // when & then : 예매를 처리하면, 오류가 응답된다
+        client.post()
+            .uri("/api/reservations")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBody)
+            .exchange()
+            .expectStatus().isBadRequest
+            .expectBody(String::class.java)
+            .isEqualTo(CinemaMessages.ERROR_INVALID_SHOWING_NUMBER)
     }
 }
