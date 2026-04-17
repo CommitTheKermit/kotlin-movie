@@ -58,7 +58,7 @@ class ShowingRepositoryTest {
 
         // then : 주어진 상영 정보들이 복원된다
         assertThat(foundShowings.showings)
-            .hasSize(3)
+            .hasSize(4)
             .allSatisfy {
                 assertThat(it.movie.title).isEqualTo(
                     TestFixtureData.movies.movies.first().title,

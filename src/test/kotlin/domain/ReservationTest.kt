@@ -34,16 +34,24 @@ class ReservationTest {
 
     @Test
     fun `예매 영화와 예매 날짜를 입력하였을 때 해당하는 상영 일정을 반환한다`() {
-        // given : 예매 영화의 id는 1이고, 예매 날짜는 2026-4-10일이다.
+        // given : 예매 영화의 id는 1이고, 예매 날짜는 2025-09-20일이다.
         val movieId = Id(1)
-        val movieTime = MovieTime.from(LocalDate.parse("2026-04-10"))
+        val movieTime = MovieTime.from(LocalDate.parse("2025-09-20"))
 
         // when : 전체 영화 리스트에서 영화를 확인하고, 전체 상영 일정에서 해당 영화와 예매 날짜를 검색하면
         val movie = TestFixtureData.movieTheater.movies.findMovieById(movieId)
         val result = TestFixtureData.movieTheater.showings.findByMovieAndDate(movie, movieTime)
 
         // then : 해당하는 상영 일정을 반환한다.
-        assertEquals(listOf(TestFixtureData.showings.first(), TestFixtureData.showings[3], TestFixtureData.showings[4]), result.showings)
+        assertEquals(
+            listOf(
+                TestFixtureData.showings[0],
+                TestFixtureData.showings[1],
+                TestFixtureData.showings[2],
+                TestFixtureData.showings[3],
+            ),
+            result.showings,
+        )
     }
 
     @Test
@@ -65,7 +73,7 @@ class ReservationTest {
     fun `해당 날짜에 상영이 있으면 선택한 번호의 상영을 반환한다`() {
         // given : 해당 날짜에 상영이 있는 영화와 유효한 상영 번호를 준비한다.
         val movie = TestFixtureData.movieTheater.movies.movies[2]
-        val movieTime = MovieTime.from(LocalDate.parse("2026-04-10"))
+        val movieTime = MovieTime.from(LocalDate.parse("2025-09-20"))
 
         // when : 상영 번호로 상영을 조회하면
         val result = TestFixtureData.movieTheater.showings.findAvailableShowing(
@@ -76,14 +84,14 @@ class ReservationTest {
         )
 
         // then : 해당하는 상영이 반환된다.
-        assertEquals(TestFixtureData.movieTheater.showings[2], result)
+        assertEquals(TestFixtureData.movieTheater.showings[6], result)
     }
 
     @Test
     fun `상영 번호가 유효 범위 밖이면 예외가 발생한다`() {
         // given : 존재하는 영화와 날짜, 그리고 유효 범위 밖의 상영 번호를 준비한다.
         val movie = TestFixtureData.movieTheater.movies.movies.first()
-        val movieTime = MovieTime.from(LocalDate.parse("2026-04-10"))
+        val movieTime = MovieTime.from(LocalDate.parse("2025-09-20"))
 
         // when : 유효 범위 밖의 번호로 상영을 조회하면
         val exception = assertThrows<IllegalArgumentException> {

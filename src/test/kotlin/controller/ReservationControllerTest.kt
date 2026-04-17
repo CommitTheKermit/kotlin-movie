@@ -1,5 +1,6 @@
 package controller
 
+import domain.seat.SeatCoordinate
 import java.io.ByteArrayInputStream
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -11,28 +12,34 @@ class ReservationControllerTest {
     fun `영화 선택부터 좌석 선택까지 전체 예매 플로우가 동작한다`() {
         // given : 영화 제목, 날짜, 상영 번호, 좌석을 순서대로 입력한다.
         val controller = ReservationController(TestFixtureData.emptyMovieTheater)
-        setInput("해리 포터\n2026-04-10\n1\nB1,B2\n")
+        setInput("해리 포터\n2025-09-20\n1\nB1,B2\n")
 
         // when : 예매를 진행하면
         val result = controller.run()
 
         // then : 선택한 영화와 좌석이 담긴 예매 정보가 반환된다.
         assertEquals(TestFixtureData.MOVIE_HARRY_POTTER, result.showing.movie.title)
-        assertEquals(listOf(TestFixtureData.seatB1, TestFixtureData.seatB2), result.seats.seats)
+        assertEquals(
+            listOf(SeatCoordinate('B', 1), SeatCoordinate('B', 2)),
+            result.seats.seats.map { it.coordinate },
+        )
     }
 
     @Test
     fun `단일 좌석으로 예매할 수 있다`() {
         // given : 영화 제목, 날짜, 상영 번호, 좌석을 순서대로 입력한다.
         val controller = ReservationController(TestFixtureData.emptyMovieTheater)
-        setInput("기생충\n2026-04-10\n1\nB1\n")
+        setInput("기생충\n2025-09-20\n1\nB1\n")
 
         // when : 예매를 진행하면
         val result = controller.run()
 
         // then : 선택한 영화와 좌석이 담긴 예매 정보가 반환된다.
         assertEquals("기생충", result.showing.movie.title)
-        assertEquals(listOf(TestFixtureData.seatB1), result.seats.seats)
+        assertEquals(
+            listOf(SeatCoordinate('B', 1)),
+            result.seats.seats.map { it.coordinate },
+        )
     }
 
     @Test
