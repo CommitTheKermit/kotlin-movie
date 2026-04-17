@@ -16,6 +16,6 @@ class Payment(private val cart: Cart, private val user: User) {
 
         val final = method.discountApply(afterPoint)
 
-        return PaymentResult(final, usedPoint)
+        return PaymentResult(final, usedPoint, method)
     }
 }

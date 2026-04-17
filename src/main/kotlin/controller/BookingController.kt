@@ -1,5 +1,6 @@
 package controller
 
+import client.ReservationRegistrator
 import domain.cart.Cart
 import domain.purchase.Payment
 import domain.user.User
@@ -11,6 +12,7 @@ class BookingController(
     private val reservationController: ReservationController,
     private val cartController: CartController,
     private val paymentController: PaymentController,
+    private val reservationRegistrar: ReservationRegistrator,
     private val user: User,
 ) {
     fun run(inputCart: Cart) {
@@ -27,6 +29,8 @@ class BookingController(
                 InputView.readPurchaseConfirm()
             }.isYes()
         ) return
+
+        reservationRegistrar.register(cart, result)
 
         OutputView.printTotal(
             cart = cart,

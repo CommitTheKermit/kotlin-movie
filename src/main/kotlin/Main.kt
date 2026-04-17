@@ -1,6 +1,7 @@
 import client.MovieApi
 import client.MovieTheaterLoader
 import client.ReservationApi
+import client.ReservationRegistrator
 import client.SeatApi
 import client.ShowingApi
 import client.api.ApiClientFactory
@@ -33,6 +34,7 @@ fun main() {
         reservationController = ReservationController(movieTheater),
         cartController = CartController(),
         paymentController = PaymentController(),
+        reservationRegistrar = ReservationRegistrator(reservationApi),
         user = user,
     ).run(cart)
 }
