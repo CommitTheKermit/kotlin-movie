@@ -1,5 +1,6 @@
 package spring.service
 
+import domain.purchase.Price
 import domain.reservation.ReservationInfo
 import domain.seat.Seats
 import org.springframework.stereotype.Service
@@ -19,19 +20,26 @@ class ReservationService(
 ) {
     @Transactional
     fun reserve(request: ReservationRequest): ReservationResponse {
-        val reservations = mutableListOf<String>()
+        val reservationIds = mutableListOf<Long>()
         val subtotal = request.reservations.sumOf { item ->
             val showing = showingRepository.findById(item.showingId)
             require(showing != null) { CinemaMessages.ERROR_INVALID_SHOWING_NUMBER }
 
             val seats = Seats(item.seats.map { seatRepository.findBySeatNumber(it) })
             val info = ReservationInfo(showing, seats)
-            val list = reservationRepository.save(info, item.showingId)
+            val savedIds = reservationRepository.save(info, item.showingId)
 
-            reservations.addAll(list.map { it.toString() })
+            reservationIds.addAll(savedIds)
             info.applyDiscount()
         }
-        val totalPrice = (subtotal - request.usedPoints)
-        return ReservationResponse(reservations, totalPrice)
+        val afterPoints = Price(subtotal - request.usedPoints)
+        val totalPrice = request.paymentMethod.discountApply(afterPoints).price
+        return ReservationResponse(
+            reservationIds = reservationIds,
+            reservations = request.reservations,
+            usedPoints = request.usedPoints,
+            paymentMethod = request.paymentMethod,
+            totalPrice = totalPrice,
+        )
     }
 }

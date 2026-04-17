@@ -15,7 +15,7 @@ class ReservationController(private val reservationService: ReservationService) 
         @RequestBody
         request: ReservationRequest,
     ): ResponseEntity<Any> = try {
-        ResponseEntity.ok(reservationService.reserve(request))
+        ResponseEntity.status(HttpStatus.CREATED).body(reservationService.reserve(request))
     } catch (e: IllegalArgumentException) {
         ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message ?: "")
     }
