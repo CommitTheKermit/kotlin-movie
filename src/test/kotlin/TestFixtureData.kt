@@ -49,13 +49,13 @@ object TestFixtureData {
 
     val showings = Showings(
         listOf(
-            Showing(MovieTime(2026, 4, 10, 10, 0), screens[0], movies.movies[0]),
-            Showing(MovieTime(2026, 4, 10, 14, 0), screens[1], movies.movies[1]),
-            Showing(MovieTime(2026, 4, 10, 21, 0), screens[2], movies.movies[2]),
-            Showing(MovieTime(2026, 4, 10, 13, 0), screens[1], movies.movies[0]),
-            Showing(MovieTime(2026, 4, 10, 18, 30), screens[2], movies.movies[0]),
-            Showing(MovieTime(2026, 4, 11, 10, 0), screens[0], movies.movies[1]),
-            Showing(MovieTime(2026, 4, 11, 15, 0), screens[1], movies.movies[2]),
+            Showing(MovieTime(2025, 9, 20, 10, 20), MockData.screens[0], MockData.movies.movies[0]),
+            Showing(MovieTime(2025, 9, 20, 13, 0), MockData.screens[0], MockData.movies.movies[0]),
+            Showing(MovieTime(2025, 9, 20, 15, 40), MockData.screens[0], MockData.movies.movies[0]),
+            Showing(MovieTime(2025, 9, 20, 20, 10), MockData.screens[0], MockData.movies.movies[0]),
+            Showing(MovieTime(2025, 9, 20, 13, 30), MockData.screens[1], MockData.movies.movies[1]),
+            Showing(MovieTime(2025, 9, 20, 16, 0), MockData.screens[1], MockData.movies.movies[1]),
+            Showing(MovieTime(2025, 9, 20, 9, 50), MockData.screens[2], MockData.movies.movies[2]),
         ),
     )
 
