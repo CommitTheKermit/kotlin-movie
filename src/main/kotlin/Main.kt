@@ -1,6 +1,7 @@
 import client.MovieApi
 import client.MovieTheaterLoader
 import client.ReservationApi
+import client.SeatApi
 import client.ShowingApi
 import client.api.ApiClientFactory
 import controller.BookingController
@@ -20,10 +21,12 @@ fun main() {
     val movieApi = apiClientFactory.create<MovieApi>()
     val reservationApi = apiClientFactory.create<ReservationApi>()
     val showingApi = apiClientFactory.create<ShowingApi>()
+    val seatApi = apiClientFactory.create<SeatApi>()
 
     val movieTheater = MovieTheaterLoader(
         movieApi = movieApi,
         showingApi = showingApi,
+        seatApi = seatApi,
     ).load()
 
     BookingController(
