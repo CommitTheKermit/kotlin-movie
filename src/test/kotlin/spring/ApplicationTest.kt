@@ -82,13 +82,50 @@ class ApplicationTest(
                 """.trimIndent(),
             )
             .exchange()
-            .expectStatus().isOk
+            .expectStatus().isCreated
             .expectBody(ReservationResponse::class.java)
             .returnResult().responseBody!!
 
         // then : 좌석 개수만큼 예매가 생성되고 총 금액이 양수로 응답된다
         assertThat(response.reservationIds).hasSize(2)
         assertThat(response.totalPrice).isPositive()
+    }
+
+    @Test
+    fun `예약 등록 응답은 요청 정보와 함께 JSON 구조로 응답된다`() {
+        // given : 상영을 저장하고
+        val showing = TestFixtureData.showings.showings[1]
+        showingRepository.save(showing)
+
+        // when & then : 예약 등록 응답에 요청 정보가 echo되고 필드 구조가 일치한다
+        client.post()
+            .uri("/api/reservations")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                """
+                {
+                  "reservations": [
+                    {
+                      "showingId": 1,
+                      "seats": ["C2", "C3"]
+                    }
+                  ],
+                  "usedPoints": 2000,
+                  "paymentMethod": "CARD"
+                }
+                """.trimIndent(),
+            )
+            .exchange()
+            .expectStatus().isCreated
+            .expectBody()
+            .jsonPath("$.reservationIds").isArray
+            .jsonPath("$.reservationIds.length()").isEqualTo(2)
+            .jsonPath("$.reservations[0].showingId").isEqualTo(1)
+            .jsonPath("$.reservations[0].seats[0]").isEqualTo("C2")
+            .jsonPath("$.reservations[0].seats[1]").isEqualTo("C3")
+            .jsonPath("$.usedPoints").isEqualTo(2000)
+            .jsonPath("$.paymentMethod").isEqualTo("CARD")
+            .jsonPath("$.totalPrice").isNumber
     }
 
     @Test
@@ -115,7 +152,7 @@ class ApplicationTest(
             .contentType(MediaType.APPLICATION_JSON)
             .body(requestBody)
             .exchange()
-            .expectStatus().isOk
+            .expectStatus().isCreated
 
         // when & then : 같은 상영, 같은 좌석에 대해 다시 요청하면 400 응답과 오류 메시지가 반환된다
         client.post()
